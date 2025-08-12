@@ -90,6 +90,7 @@ import HomeManagement from './pages/HomeManagement';
 import TaskManagement from './pages/TaskManagement';
 import ImportTaskDetail from './pages/ImportTaskDetail';
 import RolePermissionManagement from './pages/RolePermissionManagement';
+import BusinessNodeSettings from './pages/BusinessNodeSettings';
 import RolePermissionConfig from './pages/RolePermissionConfig';
 import RoleCustomerConfig from './pages/RoleCustomerConfig';
 import ApiCenter from './pages/ApiCenter';
@@ -414,6 +415,7 @@ const ControlTowerRoutes: React.FC = () => {
       {/* 系统设置 */}
       <Route path="/task-management" element={<TaskManagement />} />
       <Route path="/import-task-detail/:id" element={<ImportTaskDetail />} />
+      <Route path="/business-node-settings" element={<BusinessNodeSettings />} />
       
       {/* 销售百宝箱 */}
       <Route path="/sales-toolkit/ai-customer-acquisition" element={<AiCustomerAcquisition />} />

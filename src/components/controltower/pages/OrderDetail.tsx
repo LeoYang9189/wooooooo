@@ -9,25 +9,35 @@ import {
   Tag, 
   Collapse,
   Tabs,
-  Input
+  Input,
+  Tooltip
 } from '@arco-design/web-react';
-import {   IconLeft,  IconEdit,  IconCopy,  IconClose,  IconUp,  IconSend,  IconRight,  IconDown} from '@arco-design/web-react/icon';
+import {   IconLeft,  IconEdit,  IconCopy,  IconClose,  IconSend,  IconRight,  IconDown,  IconEye} from '@arco-design/web-react/icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFileAlt, 
-  faFileInvoice, 
-  faMoneyBillWave, 
   faAnchor, 
   faTruck, 
   faWarehouse, 
   faFileContract, 
-  faWeightHanging, 
-  faClipboardList, 
   faFileInvoiceDollar, 
   faReceipt, 
   faShippingFast,
-  faShip,
-  faGlobe
+  faGlobe,
+  faCogs,
+  faDollarSign,
+  faWeight,
+  faFileImport,
+  faFileText,
+  faExchangeAlt,
+  faBox,
+  faClock,
+  faCheckCircle,
+  faCubes,
+  faPlay,
+  faStop,
+  faShoppingCart,
+  faUndo
 } from '@fortawesome/free-solid-svg-icons';
 
 const { Title } = Typography;
@@ -37,7 +47,15 @@ const TabPane = Tabs.TabPane;
 interface OrderDetailProps {}
 
 // 业务流程节点类型
-type NodeStatus = 'completed' | 'active' | 'pending';
+type NodeStatus = 'completed' | 'partial' | 'pending';
+
+// 任务数据类型
+interface TaskItem {
+  name: string;
+  type: 'customer' | 'operation';
+  status: 'completed' | 'pending' | 'skipped';
+  time?: string;
+}
 
 // 节点数据类型
 interface NodeItem {
@@ -45,39 +63,294 @@ interface NodeItem {
   title: string;
   icon: any; // FontAwesome图标
   status: NodeStatus;
-  date: string;
   active: boolean;
+  tasks: TaskItem[];
 }
 
 // 业务节点数据
 const businessNodes: NodeItem[] = [
-  { id: '1', title: '创建订单', icon: faFileAlt, status: 'completed', date: '2024-12-21 17:25', active: true },
-  { id: '2', title: '运价', icon: faMoneyBillWave, status: 'completed', date: '2024-12-21 17:25', active: true },
-  { id: '3', title: '订舱', icon: faAnchor, status: 'active', date: '2024-12-21 17:25', active: true },
-  { id: '4', title: '拖车', icon: faTruck, status: 'pending', date: '', active: false },
-  { id: '5', title: '仓库', icon: faWarehouse, status: 'pending', date: '', active: false },
-  { id: '6', title: '报关', icon: faFileContract, status: 'pending', date: '', active: false },
-  { id: '7', title: 'VGM', icon: faWeightHanging, status: 'pending', date: '', active: false },
-  { id: '8', title: '提单补料', icon: faClipboardList, status: 'pending', date: '', active: true },
-  { id: '9', title: '账单', icon: faFileInvoiceDollar, status: 'pending', date: '', active: false },
-  { id: '10', title: '发票', icon: faFileInvoice, status: 'pending', date: '', active: false },
-  { id: '11', title: '水单', icon: faReceipt, status: 'pending', date: '', active: false },
-  { id: '12', title: '提单', icon: faShippingFast, status: 'pending', date: '', active: false }
+  { 
+    id: 'production', 
+    title: '生产', 
+    icon: faCogs, 
+    status: 'completed',
+    active: true,
+    tasks: [
+      { name: '生产安排', type: 'operation', status: 'completed', time: '2024-03-10 09:00:00' }
+    ]
+  },
+  { 
+    id: 'freight_rate', 
+    title: '运价', 
+    icon: faDollarSign, 
+    status: 'partial',
+    active: true,
+    tasks: [
+      { name: '提交询价', type: 'customer', status: 'completed', time: '2024-03-10 14:00:00' },
+      { name: '提交报价', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'booking', 
+    title: '订舱', 
+    icon: faAnchor, 
+    status: 'completed',
+    active: true,
+    tasks: [
+      { name: '订舱申请', type: 'customer', status: 'completed', time: '2024-03-11 10:00:00' },
+      { name: '订舱确认', type: 'operation', status: 'completed', time: '2024-03-11 15:00:00' }
+    ]
+  },
+  { 
+    id: 'trucking', 
+    title: '拖车', 
+    icon: faTruck, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '拖车安排', type: 'operation', status: 'completed', time: '2024-03-12 14:00:00' }
+    ]
+  },
+  { 
+    id: 'warehouse', 
+    title: '仓库', 
+    icon: faWarehouse, 
+    status: 'partial',
+    active: false,
+    tasks: [
+      { name: '入库安排', type: 'operation', status: 'completed', time: '2024-03-13 16:00:00' },
+      { name: '仓储费用', type: 'customer', status: 'skipped', time: '2024-03-13 17:00:00' }
+    ]
+  },
+  { 
+    id: 'customs', 
+    title: '报关', 
+    icon: faFileContract, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '报关资料', type: 'customer', status: 'completed', time: '2024-03-14 09:00:00' },
+      { name: '报关申报', type: 'operation', status: 'completed', time: '2024-03-14 11:00:00' }
+    ]
+  },
+  { 
+    id: 'manifest', 
+    title: '舱单', 
+    icon: faFileAlt, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '舱单制作', type: 'operation', status: 'completed', time: '2024-03-15 09:00:00' }
+    ]
+  },
+  { 
+    id: 'vgm', 
+    title: 'VGM', 
+    icon: faWeight, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: 'VGM提交', type: 'customer', status: 'completed', time: '2024-03-15 14:00:00' }
+    ]
+  },
+  { 
+    id: 'supplement', 
+    title: '补料', 
+    icon: faFileImport, 
+    status: 'partial',
+    active: true,
+    tasks: [
+      { name: '补料提交', type: 'customer', status: 'completed', time: '2024-03-16 10:00:00' },
+      { name: '补料审核', type: 'operation', status: 'pending' },
+      { name: '补料费用', type: 'customer', status: 'skipped', time: '2024-03-16 11:00:00' }
+    ]
+  },
+  { 
+    id: 'bill', 
+    title: '账单', 
+    icon: faReceipt, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '账单生成', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'invoice', 
+    title: '发票', 
+    icon: faFileInvoiceDollar, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '发票开具', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'bill_of_lading', 
+    title: '提单', 
+    icon: faFileText, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '提单签发', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'switch_bill', 
+    title: '换单', 
+    icon: faExchangeAlt, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '换单处理', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'container_pickup', 
+    title: '提柜', 
+    icon: faBox, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '提柜安排', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'delivery', 
+    title: '送货', 
+    icon: faShippingFast, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '配送安排', type: 'operation', status: 'pending' }
+    ]
+  }
 ];
 
 // 运踪节点数据
 const shippingNodes: NodeItem[] = [
-  { id: 's1', title: '报关', icon: faFileContract, status: 'completed', date: '2024-12-21 17:25', active: true },
-  { id: 's2', title: '海上订舱', icon: faAnchor, status: 'completed', date: '2024-12-21 17:25', active: true },
-  { id: 's3', title: '港区单证', icon: faFileAlt, status: 'active', date: '2024-12-21 17:25', active: true },
-  { id: 's4', title: '车辆进场', icon: faTruck, status: 'pending', date: '', active: false },
-  { id: 's5', title: '装卸作业', icon: faWarehouse, status: 'pending', date: '', active: false },
-  { id: 's6', title: '船舶靠离', icon: faShip, status: 'pending', date: '', active: false },
-  { id: 's7', title: '离港开航', icon: faShippingFast, status: 'pending', date: '', active: false },
-  { id: 's8', title: '在途追踪', icon: faShip, status: 'pending', date: '', active: false },
-  { id: 's9', title: '抵达目的港', icon: faAnchor, status: 'pending', date: '', active: false },
-  { id: 's10', title: '海关', icon: faFileContract, status: 'pending', date: '', active: false },
-  { id: 's11', title: '送货', icon: faTruck, status: 'pending', date: '', active: false }
+  { 
+    id: 'empty_pickup', 
+    title: '提空箱', 
+    icon: faBox, 
+    status: 'completed',
+    active: true,
+    tasks: [
+      { name: '空箱提取', type: 'operation', status: 'completed', time: '2024-03-15 09:00:00' }
+    ]
+  },
+  { 
+    id: 'expected_port_open', 
+    title: '预计开港', 
+    icon: faClock, 
+    status: 'completed',
+    active: true,
+    tasks: [
+      { name: '开港通知', type: 'operation', status: 'completed', time: '2024-03-15 14:00:00' }
+    ]
+  },
+  { 
+    id: 'port_cutoff', 
+    title: '港区截单', 
+    icon: faFileAlt, 
+    status: 'completed',
+    active: true,
+    tasks: [
+      { name: '截单确认', type: 'operation', status: 'completed', time: '2024-03-16 10:00:00' }
+    ]
+  },
+  { 
+    id: 'heavy_entry', 
+    title: '重箱进场', 
+    icon: faTruck, 
+    status: 'partial',
+    active: false,
+    tasks: [
+      { name: '进场申请', type: 'customer', status: 'completed', time: '2024-03-16 15:00:00' },
+      { name: '进场确认', type: 'operation', status: 'pending' },
+      { name: '加急费用', type: 'customer', status: 'skipped', time: '2024-03-16 16:00:00' }
+    ]
+  },
+  { 
+    id: 'customs_release', 
+    title: '海关放行', 
+    icon: faCheckCircle, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '海关审核', type: 'operation', status: 'completed', time: '2024-03-17 11:00:00' }
+    ]
+  },
+  { 
+    id: 'terminal_release', 
+    title: '码头放行', 
+    icon: faWarehouse, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '码头确认', type: 'operation', status: 'completed', time: '2024-03-17 16:00:00' }
+    ]
+  },
+  { 
+    id: 'actual_berth', 
+    title: '实际靠泊', 
+    icon: faAnchor, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '靠泊确认', type: 'operation', status: 'completed', time: '2024-03-18 08:00:00' }
+    ]
+  },
+  { 
+    id: 'loading_plan', 
+    title: '配载', 
+    icon: faCubes, 
+    status: 'completed',
+    active: false,
+    tasks: [
+      { name: '配载计划', type: 'operation', status: 'completed', time: '2024-03-18 14:00:00' }
+    ]
+  },
+  { 
+    id: 'actual_departure', 
+    title: '实际开船', 
+    icon: faPlay, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '开船确认', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'unloading', 
+    title: '卸船', 
+    icon: faStop, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '卸船作业', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'heavy_pickup', 
+    title: '提重', 
+    icon: faShoppingCart, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '重箱提取', type: 'operation', status: 'pending' }
+    ]
+  },
+  { 
+    id: 'return_empty', 
+    title: '还箱', 
+    icon: faUndo, 
+    status: 'pending',
+    active: false,
+    tasks: [
+      { name: '空箱归还', type: 'operation', status: 'pending' }
+    ]
+  }
 ];
 
 const OrderDetail: React.FC<OrderDetailProps> = () => {
@@ -87,9 +360,10 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
   // const [activeKey, setActiveKey] = useState<string[]>(['1', '2', '3']);
   const [message, setMessage] = useState<string>('');
   const [nodeTab, setNodeTab] = useState<string>('business');
-  const [activeKeys, setActiveKeys] = useState<string[]>(['3', '8']);
+  const [activeKeys, setActiveKeys] = useState<string[]>([]);
   const [showMap, setShowMap] = useState<boolean>(false);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [nodeAreaCollapsed, setNodeAreaCollapsed] = useState<boolean>(false);
   
   // 自定义查看按钮组件，符合截图样式 - 有边框无底色
   const ViewButton = () => (
@@ -175,96 +449,19 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
   );
   */
 
-  const renderNodeContent = (node: NodeItem) => {
-    if (node.id === '3') { // 订舱节点
-      return (
-        <div className="mt-3 px-4 pb-4">
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">当前状态:</div>
-            <div className="col-span-8 font-medium">已订舱待确认</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">状态时间:</div>
-            <div className="col-span-8">2024-12-21 17:25</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">待办任务:</div>
-            <div className="col-span-8 text-blue-600 font-medium">上传订舱确认</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm">
-            <div className="col-span-4 text-gray-500">任务人:</div>
-            <div className="col-span-8">
-              <div className="font-medium">Stella Wu</div>
-              <div className="text-gray-500 text-xs mt-1">@上海得普赛国际货运代理有限公司</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    if (node.id === '8') { // 提单补料节点
-      return (
-        <div className="mt-3 px-4 pb-4">
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">当前状态:</div>
-            <div className="col-span-8 font-medium">已确认</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">状态时间:</div>
-            <div className="col-span-8">2024-12-21 17:25</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">待办任务:</div>
-            <div className="col-span-8 text-blue-600 font-medium">上传提单样件</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm">
-            <div className="col-span-4 text-gray-500">任务人:</div>
-            <div className="col-span-8">
-              <div className="font-medium">Steve Wu</div>
-              <div className="text-gray-500 text-xs mt-1">@上海XXX货运代理</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    // 业务节点中ID为2的节点
-    if (node.id === '2') {
-      return (
-        <div className="mt-3 px-4 pb-4">
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">当前状态:</div>
-            <div className="col-span-8 font-medium">已接价待确认</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">状态时间:</div>
-            <div className="col-span-8">2024-12-21 17:25</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm mb-3">
-            <div className="col-span-4 text-gray-500">待办任务:</div>
-            <div className="col-span-8 text-blue-600 font-medium">确认报价</div>
-          </div>
-          <div className="grid grid-cols-12 text-sm">
-            <div className="col-span-4 text-gray-500">任务人:</div>
-            <div className="col-span-8">
-              <div className="font-medium">Steve Wu</div>
-              <div className="text-gray-500 text-xs mt-1">@上海XXX货运代理</div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    return null;
-  };
+
 
   const StatusIcon = ({ status, icon }: { status: NodeStatus, icon: any }) => {
     const bgColor = status === 'completed' ? 'bg-blue-500' : 
-                   status === 'active' ? 'bg-blue-500' : 'bg-gray-300';
+                   status === 'partial' ? 'bg-yellow-500' : 'bg-gray-300';
+    const iconColor = status === 'pending' ? 'text-gray-500' : 'text-white';
     
     return (
-      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center text-white shadow-sm`}>
-        <FontAwesomeIcon icon={icon} className="text-sm" />
+      <div className={`w-8 h-8 ${bgColor} rounded-full flex items-center justify-center shadow-sm relative`}>
+        <FontAwesomeIcon icon={icon} className={`text-sm ${iconColor}`} />
+        {status === 'partial' && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></div>
+        )}
       </div>
     );
   };
@@ -278,7 +475,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
         {nodes.map((node) => {
           // 节点状态样式
           const isCompleted = node.status === 'completed';
-          const isActive = node.status === 'active';
+          const isPartial = node.status === 'partial';
           const isPending = node.status === 'pending';
           
           // 展开状态
@@ -288,68 +485,111 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
             <div key={node.id} className="mb-5 relative">
               {/* 节点图标 */}
               <div className="absolute left-0 z-10">
-                <StatusIcon status={node.status} icon={node.icon} />
+                <Tooltip
+                  content={
+                    <div>
+                      {node.tasks.map((task: any, index: number) => (
+                        <div key={index} style={{ marginBottom: '4px', color: 'white' }}>
+                          <span>
+                            {task.type === 'customer' ? '客户任务' : '运营任务'}：{task.name} - 
+                          </span>
+                          <span style={{
+                            color: task.status === 'completed' ? '#52c41a' : 
+                                   task.status === 'skipped' ? '#faad14' : '#ff4d4f',
+                            fontWeight: 'bold'
+                          }}>
+                            {task.status === 'completed' ? '已完成' : 
+                             task.status === 'skipped' ? '已跳过' : '未完成'}
+                          </span>
+                          {(task.status === 'completed' || task.status === 'skipped') && task.time && (
+                            <div style={{ fontSize: '12px', color: '#d9d9d9', marginTop: '2px' }}>
+                              {task.time}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                  position="top"
+                >
+                  <div style={{ cursor: 'pointer' }}>
+                    <StatusIcon status={node.status} icon={node.icon} />
+                  </div>
+                </Tooltip>
               </div>
               
               {/* 节点卡片 */}
-              <div className={`ml-12 ${node.active ? '' : 'opacity-60'}`}>
+              <div className="ml-12">
                 <div 
                   className={`border rounded-lg ${isExpanded ? 'border-blue-200 bg-blue-50 shadow-sm' : 'border-gray-200'} overflow-hidden transition-all duration-200 ease-in-out hover:shadow-sm`}
                   onClick={() => {
-                    if (node.active) {
-                      setActiveKeys(
-                        isExpanded 
-                          ? activeKeys.filter(key => key !== node.id)
-                          : [...activeKeys, node.id]
-                      );
-                    }
+                    setActiveKeys(
+                      isExpanded 
+                        ? activeKeys.filter(key => key !== node.id)
+                        : [...activeKeys, node.id]
+                    );
                   }}
                 >
                   {/* 卡片头部 */}
-                  <div className={`px-4 py-3 flex justify-between items-center ${node.active ? 'cursor-pointer' : ''}`}>
+                  <div className="px-4 py-3 flex justify-between items-center cursor-pointer">
                     <div className="flex items-center space-x-2">
                       <div className="text-base font-medium">
                         {node.title}
                       </div>
-                      {isActive && (
-                        <Tag color="orange" size="small" className="border border-orange-200">进行中</Tag>
-                      )}
                       {isCompleted && (
                         <Tag color="blue" size="small" className="border border-blue-200">已完成</Tag>
                       )}
+                      {isPartial && (
+                        <Tag color="orange" size="small" className="border border-orange-200">部分完成</Tag>
+                      )}
                       {isPending && (
-                        <Tag color="gray" size="small" className="border border-gray-200">待处理</Tag>
+                        <Tag color="gray" size="small" className="border border-gray-200">未完成</Tag>
                       )}
                     </div>
                     <div className="flex items-center">
-                      {/* 缩起状态下在卡片内显示日期 */}
-                      {!isExpanded && node.date && (
-                        <div className="text-xs text-gray-500 mr-3">
-                          {node.date}
-                        </div>
-                      )}
-                      {node.active && (
-                        <div className="text-gray-400 hover:text-blue-500 transition-colors">
-                          {isExpanded ? <IconDown /> : <IconRight />}
-                        </div>
-                      )}
+                      <div className="text-gray-400 hover:text-blue-500 transition-colors">
+                        {isExpanded ? <IconDown /> : <IconRight />}
+                      </div>
                     </div>
                   </div>
                   
                   {/* 卡片内容 */}
                   {isExpanded && (
-                    <div className="border-t border-blue-100">
-                      {renderNodeContent(node)}
+                    <div className="border-t border-blue-100 bg-gray-50 px-4 py-3">
+                      <div className="space-y-2">
+                        {node.tasks.map((task: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between py-2 px-3 bg-white rounded border">
+                            <div className="flex items-center space-x-2">
+                              <Tag 
+                                color={task.type === 'customer' ? 'blue' : 'green'} 
+                                size="small"
+                              >
+                                {task.type === 'customer' ? '客户任务' : '运营任务'}
+                              </Tag>
+                              <span className="text-sm font-medium">{task.name}</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Tag 
+                                color={
+                                  task.status === 'completed' ? 'green' : 
+                                  task.status === 'skipped' ? 'orange' : 'red'
+                                }
+                                size="small"
+                              >
+                                {task.status === 'completed' ? '已完成' : 
+                                 task.status === 'skipped' ? '已跳过' : '未完成'}
+                              </Tag>
+                              {(task.status === 'completed' || task.status === 'skipped') && task.time && (
+                                <span className="text-xs text-gray-500">{task.time}</span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
-                
-                {/* 节点日期 - 只在未展开且有日期时显示（这部分被替换，所以实际不显示了） */}
-                {false && node.date && !isExpanded && (
-                  <div className="mt-1 ml-3 text-xs text-gray-500">
-                    {node.date}
-                  </div>
-                )}
+
               </div>
             </div>
           );
@@ -373,10 +613,8 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
         </div>
         <div>
           <Space>
-            <Button type="secondary" icon={<IconEdit />}>编辑</Button>
             <Button type="primary" icon={<IconCopy />}>复制</Button>
-            <Button type="secondary" icon={<IconClose />}>取消</Button>
-            <Button type="secondary" icon={<IconUp />}>置顶</Button>
+            <Button type="secondary" icon={<IconClose />}>关闭</Button>
             <Button 
               type="secondary"
               icon={<FontAwesomeIcon icon={faGlobe} />} 
@@ -488,9 +726,9 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className={`grid gap-4 transition-all duration-300 ${nodeAreaCollapsed ? 'grid-cols-1' : 'grid-cols-4'}`}>
         {/* 左侧内容 */}
-        <div className="col-span-2">
+        <div className={`${nodeAreaCollapsed ? 'col-span-1' : 'col-span-3'}`}>
           {/* 任务模块 */}
           <div className="mb-4">
             {/* 未完成任务 */}
@@ -502,112 +740,65 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                 <CollapseItem
                   header={
                     <div className="flex items-center">
-                      <Title heading={6} style={{ margin: 0 }}>未完成任务（3）</Title>
+                      <Title heading={6} style={{ margin: 0 }}>未完成任务（13）</Title>
                     </div>
                   }
                   name="1"
                 >
-                  {/* 任务1：上传SI */}
-                  <div className="border-b pb-4 mb-4 border-gray-200">
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 10, 2021 17:00</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传SI</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海KKK国际物流有限公司</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 12, 2021 17:00</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* 任务2：上传VGM */}
-                  <div className="border-b pb-4 mb-4 border-gray-200">
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 12, 2021 14:00</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传VGM</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海得普赛国际物流有限公司</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 11, 2021 09:30</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
+                  {/* 运营版未完成任务 */}
+                  {[
+                    { name: '提交报价', deadline: 'Nov 10, 2021 17:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 09, 2021 10:00' },
+                    { name: '确认BC件', deadline: 'Nov 12, 2021 14:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 11, 2021 09:30' },
+                    { name: '确认派车', deadline: 'Nov 13, 2021 16:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 12, 2021 14:20' },
+                    { name: '确认进仓', deadline: 'Nov 14, 2021 10:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 13, 2021 08:15' },
+                    { name: '确认报关', deadline: 'Nov 15, 2021 15:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 14, 2021 11:30' },
+                    { name: '确认舱单', deadline: 'Nov 16, 2021 12:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 15, 2021 09:45' },
+                    { name: '确认VGM', deadline: 'Nov 17, 2021 14:30', executor: '上海得普赛国际物流有限公司', generated: 'Nov 16, 2021 10:20' },
+                    { name: '确认补料', deadline: 'Nov 18, 2021 16:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 17, 2021 13:10' },
+                    { name: '上传账单', deadline: 'Nov 19, 2021 11:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 18, 2021 15:30' },
+                    { name: '上传发票', deadline: 'Nov 20, 2021 13:30', executor: '上海得普赛国际物流有限公司', generated: 'Nov 19, 2021 12:45' },
+                    { name: '放单', deadline: 'Nov 21, 2021 15:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 20, 2021 14:20' },
+                    { name: '确认换单', deadline: 'Nov 22, 2021 10:30', executor: '上海得普赛国际物流有限公司', generated: 'Nov 21, 2021 16:15' },
+                    { name: '上传送货计划', deadline: 'Nov 23, 2021 12:00', executor: '上海得普赛国际物流有限公司', generated: 'Nov 22, 2021 11:40' }
+                  ].map((task, index) => (
+                    <div key={index} className={`${index < 12 ? 'border-b pb-4 mb-4 border-gray-200' : ''}`}>
+                      <div className="grid grid-cols-4 gap-4 mt-3 relative">
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">截止时间</div>
+                          <div className="font-medium">{task.deadline}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">任务名称</div>
+                          <div className="font-medium">{task.name}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">执行人</div>
+                          <div className="font-medium">{task.executor}</div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-gray-500 mb-1">任务状态</div>
+                          <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 {task.generated}</span></div>
+                        </div>
+                        
+                        {/* 操作按钮放在最右侧 */}
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex gap-2">
+                          <Button 
+                            type="primary" 
+                            size="small"
+                            icon={<IconSend />}
+                            onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
+                          >处理</Button>
+                          <Button 
+                            size="small"
+                            onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
+                          >跳过</Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* 任务3：上传提单补料 */}
-                  <div>
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 15, 2021 16:30</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传提单补料</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海XXX货运代理</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 13, 2021 10:15</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </CollapseItem>
               </Collapse>
             </Card>
@@ -621,32 +812,61 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                 <CollapseItem
                   header={
                     <div className="flex items-center">
-                      <Title heading={6} style={{ margin: 0 }}>已完成任务（3）</Title>
+                      <Title heading={6} style={{ margin: 0 }}>已完成任务（13）</Title>
                     </div>
                   }
                   name="1"
                 >
-                  <div className="grid grid-cols-4 gap-4 mt-3">
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">完成时间</div>
-                      <div className="font-medium">Nov 08, 2021 14:30</div>
+                  {/* 运营版已完成任务 */}
+                  {[
+                    { name: '提交报价', deadline: 'Nov 01, 2021 17:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 01, 2021 16:30' },
+                    { name: '确认BC件', deadline: 'Nov 02, 2021 14:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 02, 2021 13:45' },
+                    { name: '确认派车', deadline: 'Nov 03, 2021 16:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 03, 2021 15:20' },
+                    { name: '确认进仓', deadline: 'Nov 04, 2021 10:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 04, 2021 09:15' },
+                    { name: '确认报关', deadline: 'Nov 05, 2021 15:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 05, 2021 14:30' },
+                    { name: '确认舱单', deadline: 'Nov 06, 2021 12:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 06, 2021 11:45' },
+                    { name: '确认VGM', deadline: 'Nov 07, 2021 14:30', executor: '上海得普赛国际物流有限公司', completed: 'Nov 07, 2021 14:20' },
+                    { name: '确认补料', deadline: 'Nov 08, 2021 16:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 08, 2021 15:10' },
+                    { name: '上传账单', deadline: 'Nov 09, 2021 11:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 09, 2021 10:30' },
+                    { name: '上传发票', deadline: 'Nov 10, 2021 13:30', executor: '上海得普赛国际物流有限公司', completed: 'Nov 10, 2021 13:15' },
+                    { name: '放单', deadline: 'Nov 11, 2021 15:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 11, 2021 14:45' },
+                    { name: '确认换单', deadline: 'Nov 12, 2021 10:30', executor: '上海得普赛国际物流有限公司', completed: 'Nov 12, 2021 10:15' },
+                    { name: '上传送货计划', deadline: 'Nov 13, 2021 12:00', executor: '上海得普赛国际物流有限公司', completed: 'Nov 13, 2021 11:40' }
+                  ].map((task, index) => (
+                    <div key={index} className={`${index < 12 ? 'border-b pb-4 mb-4 border-gray-200' : ''}`}>
+                      <div className="grid grid-cols-4 gap-4 mt-3 relative">
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">截止时间</div>
+                          <div className="font-medium">{task.deadline}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">任务名称</div>
+                          <div className="font-medium">{task.name}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">执行人</div>
+                          <div className="font-medium">{task.executor}</div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-gray-500 mb-1">任务状态</div>
+                          <div className="font-medium text-green-600">已完成 <span className="text-xs text-gray-500 ml-1">完成于 {task.completed}</span></div>
+                        </div>
+                        
+                        {/* 查看按钮放在最右侧 */}
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+                          <Button 
+                            type="outline" 
+                            size="small"
+                            icon={<IconEye />}
+                            onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
+                          >查看</Button>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">任务名称</div>
-                      <div className="font-medium">确认订舱</div>
-                    </div>
-                    
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">执行人</div>
-                      <div className="font-medium">上海得普赛国际物流有限公司</div>
-                    </div>
-                    
-                    <div>
-                      <div className="text-gray-500 mb-1">任务状态</div>
-                      <div className="font-medium text-green-600">已完成 <span className="text-xs text-gray-500 ml-1">完成于 Nov 08, 2021 14:30</span></div>
-                    </div>
-                  </div>
+                  ))}
                 </CollapseItem>
               </Collapse>
             </Card>
@@ -654,7 +874,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
 
           {/* 选项卡区域 */}
           <Card bordered={false} className="mb-4 shadow-sm">
-            <Tabs defaultActiveTab="留言板">
+            <Tabs defaultActiveTab="概览">
               <TabPane key="留言板" title="留言板">
                 {/* 协作方联系信息 - 可展开缩起 - 移到文本输入框上方 */}
                 <Collapse defaultActiveKey={[]} bordered={false} className="mb-4">
@@ -1155,99 +1375,69 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
               <TabPane key="文件" title="文件">
                 <div className="flex justify-between mb-4">
                   <div className="flex space-x-4">
+                    {/* 文件名搜索 */}
+                    <Input 
+                      placeholder="搜索文件名"
+                      className="w-48"
+                      allowClear
+                    />
                     <div className="relative">
-                      {/* 文件状态下拉菜单 */}
+                      {/* 节点筛选下拉菜单 */}
                       <Button 
                         className="w-32 flex justify-between items-center"
                         onClick={() => {
-                          const dropdown = document.getElementById('fileStatusDropdown');
+                          const dropdown = document.getElementById('nodeFilterDropdown');
                           if (dropdown) {
                             dropdown.classList.toggle('hidden');
-                            // 关闭其他下拉菜单
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
                           }
                         }}
                       >
-                        文件状态 <IconDown className="text-xs" />
+                        节点筛选 <IconDown className="text-xs" />
                       </Button>
                       <div 
-                        id="fileStatusDropdown"
+                        id="nodeFilterDropdown"
                         className="absolute left-0 top-full mt-1 w-32 bg-white shadow-lg rounded z-50 hidden"
                       >
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >有效</div>
+                        >订舱</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >过期</div>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      {/* 文件类型下拉菜单 */}
-                      <Button 
-                        className="w-32 flex justify-between items-center"
-                        onClick={() => {
-                          const dropdown = document.getElementById('fileTypeDropdown');
-                          if (dropdown) {
-                            dropdown.classList.toggle('hidden');
-                            // 关闭其他下拉菜单
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
-                          }
-                        }}
-                      >
-                        文件类型 <IconDown className="text-xs" />
-                      </Button>
-                      <div 
-                        id="fileTypeDropdown"
-                        className="absolute left-0 top-full mt-1 w-56 bg-white shadow-lg rounded z-50 hidden"
-                      >
+                        >报关</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >托书</div>
+                        >拖车</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >订舱确认</div>
+                        >仓库</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >提单格式件</div>
+                        >VGM</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >账单</div>
-                        <div 
-                          className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
-                          }}
-                        >发票</div>
-                        <div 
-                          className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
-                          }}
-                        >进仓通知</div>
+                        >补料</div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between" style={{ width: '250px' }}> {/* 使用固定宽度和justify-between彻底分开按钮 */}
-                    <Button type="outline" icon={<IconEdit />}>上传文件</Button>
+                  <div className="flex justify-end">
                     <Button type="outline" icon={<IconDown />}>下载全部</Button>
                   </div>
                 </div>
@@ -1276,7 +1466,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                             <input type="checkbox" className="form-checkbox" />
                           </td>
                           <td className="py-4">
-                            <div className="text-blue-600">{isEven ? 'Booking Form (PDF)' : 'Shipping Instructions'}</div>
+                            <div className="text-blue-600">{isEven ? '订舱-上传BC件' : '报关-上传报关资料'}</div>
                             <div className="text-gray-500 text-sm">
                               {isEven ? 'ACL-Booking-FLEX-1198464.pdf' : '1198464-Shipping-Instructions-20211015T022845.pdf'}
                             </div>
@@ -1330,8 +1520,6 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                   </tbody>
                 </table>
               </TabPane>
-              <TabPane key="费用" title="费用" />
-              <TabPane key="报价" title="报价" />
             </Tabs>
           </Card>
 
@@ -1339,22 +1527,52 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
         </div>
 
         {/* 右侧侧边栏 */}
-        <div className="col-span-1">
-          <Card className="shadow-sm border-0">
-            <div className="border-b pb-3 mb-4 flex">
-              <div className={`cursor-pointer px-4 py-2 ${nodeTab === 'business' ? 'text-blue-600 border-b-2 border-blue-600 font-medium' : 'text-gray-600'}`} onClick={() => setNodeTab('business')}>
-                业务节点
+        {!nodeAreaCollapsed && (
+          <div className="col-span-1">
+            <Card className="shadow-sm border-0">
+              <div className="border-b pb-3 mb-4 flex items-center justify-between">
+                <div className="flex">
+                  <div className={`cursor-pointer px-4 py-2 ${nodeTab === 'business' ? 'text-blue-600 border-b-2 border-blue-600 font-medium' : 'text-gray-600'}`} onClick={() => setNodeTab('business')}>
+                    业务节点
+                  </div>
+                  <div className={`cursor-pointer px-4 py-2 ${nodeTab === 'shipping' ? 'text-blue-600 border-b-2 border-blue-600 font-medium' : 'text-gray-600'}`} onClick={() => setNodeTab('shipping')}>
+                    运踪节点
+                  </div>
+                </div>
+                <div 
+                  className="cursor-pointer bg-blue-500 hover:bg-blue-600 shadow-lg rounded-l-lg p-3 text-white transition-all duration-200 border border-r-0 border-blue-500 hover:border-blue-600 flex items-center justify-center fixed right-0 top-1/2 transform -translate-y-1/2 z-50"
+                  onClick={() => setNodeAreaCollapsed(!nodeAreaCollapsed)}
+                  title="收起节点区域"
+                >
+                  <IconRight className="text-lg" />
+                </div>
               </div>
-              <div className={`cursor-pointer px-4 py-2 ${nodeTab === 'shipping' ? 'text-blue-600 border-b-2 border-blue-600 font-medium' : 'text-gray-600'}`} onClick={() => setNodeTab('shipping')}>
-                运踪节点
+              <div className="transition-all duration-300 ease-in-out">
+                {nodeTab === 'business' ? renderNodes(businessNodes) : renderNodes(shippingNodes)}
               </div>
+            </Card>
+          </div>
+        )}
+        
+        {/* 收起状态下的展开按钮 */}
+        {nodeAreaCollapsed && (
+          <div className="fixed right-0 top-1/2 transform -translate-y-1/2 z-50">
+            <div 
+              className="cursor-pointer bg-blue-500 hover:bg-blue-600 shadow-lg rounded-l-lg p-3 text-white transition-all duration-200 border border-r-0 border-blue-500 hover:border-blue-600 flex items-center justify-center"
+              onClick={() => setNodeAreaCollapsed(!nodeAreaCollapsed)}
+              title="展开节点区域"
+            >
+              <IconLeft className="text-lg" />
             </div>
-            {nodeTab === 'business' ? renderNodes(businessNodes) : renderNodes(shippingNodes)}
-          </Card>
-        </div>
+            {/* 添加一个小的文字提示 */}
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+              点击展开节点区域
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default OrderDetail; 
+export default OrderDetail;

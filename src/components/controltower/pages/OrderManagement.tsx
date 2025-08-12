@@ -14,7 +14,7 @@ import {
   Message,
   Modal,
   Checkbox,
-
+  Tooltip,
   Typography,
   Grid,
   Radio,
@@ -32,6 +32,8 @@ import {
   IconDragDotVertical,
   IconUp,
   IconDown,
+  IconLeft,
+  IconRight,
   IconList,
   IconSync
 } from '@arco-design/web-react/icon';
@@ -939,44 +941,268 @@ const OrderManagement: React.FC = () => {
     
     // 业务节点数据
     const businessNodes = [
-      { id: 'production', name: '生产', icon: faCogs, completed: true, time: '2024-03-10 09:00:00' },
-      { id: 'freight_rate', name: '运价', icon: faDollarSign, completed: true, time: '2024-03-10 14:00:00' },
-      { id: 'booking', name: '订舱', icon: faAnchor, completed: true, time: '2024-03-11 10:00:00' },
-      { id: 'trucking', name: '拖车', icon: faTruck, completed: true, time: '2024-03-12 14:00:00' },
-      { id: 'warehouse', name: '仓库', icon: faWarehouse, completed: true, time: '2024-03-13 16:00:00' },
-      { id: 'customs', name: '报关', icon: faFileContract, completed: true, time: '2024-03-14 11:00:00' },
-      { id: 'manifest', name: '舱单', icon: faFileAlt, completed: true, time: '2024-03-15 09:00:00' },
-      { id: 'vgm', name: 'VGM', icon: faWeight, completed: true, time: '2024-03-15 14:00:00' },
-      { id: 'supplement', name: '补料', icon: faFileImport, completed: true, time: '2024-03-16 10:00:00' },
-      { id: 'bill', name: '账单', icon: faReceipt, completed: false, time: '-' },
-      { id: 'invoice', name: '发票', icon: faFileInvoiceDollar, completed: false, time: '-' },
-      { id: 'bill_of_lading', name: '提单', icon: faFileText, completed: false, time: '-' },
-      { id: 'switch_bill', name: '换单', icon: faExchangeAlt, completed: false, time: '-' },
-      { id: 'container_pickup', name: '提柜', icon: faBox, completed: false, time: '-' },
-      { id: 'delivery', name: '送货', icon: faShippingFast, completed: false, time: '-' }
+      { 
+        id: 'production', 
+        name: '生产', 
+        icon: faCogs, 
+        status: 'completed',
+        tasks: [
+          { name: '生产安排', type: 'operation', status: 'completed', time: '2024-03-10 09:00:00' }
+        ]
+      },
+      { 
+        id: 'freight_rate', 
+        name: '运价', 
+        icon: faDollarSign, 
+        status: 'partial',
+        tasks: [
+          { name: '提交询价', type: 'customer', status: 'completed', time: '2024-03-10 14:00:00' },
+          { name: '提交报价', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'booking', 
+        name: '订舱', 
+        icon: faAnchor, 
+        status: 'completed',
+        tasks: [
+          { name: '订舱申请', type: 'customer', status: 'completed', time: '2024-03-11 10:00:00' },
+          { name: '订舱确认', type: 'operation', status: 'completed', time: '2024-03-11 15:00:00' }
+        ]
+      },
+      { 
+        id: 'trucking', 
+        name: '拖车', 
+        icon: faTruck, 
+        status: 'completed',
+        tasks: [
+          { name: '拖车安排', type: 'operation', status: 'completed', time: '2024-03-12 14:00:00' }
+        ]
+      },
+      { 
+        id: 'warehouse', 
+        name: '仓库', 
+        icon: faWarehouse, 
+        status: 'partial',
+        tasks: [
+          { name: '入库安排', type: 'operation', status: 'completed', time: '2024-03-13 16:00:00' },
+          { name: '仓储费用', type: 'customer', status: 'skipped', time: '2024-03-13 17:00:00' }
+        ]
+      },
+      { 
+        id: 'customs', 
+        name: '报关', 
+        icon: faFileContract, 
+        status: 'completed',
+        tasks: [
+          { name: '报关资料', type: 'customer', status: 'completed', time: '2024-03-14 09:00:00' },
+          { name: '报关申报', type: 'operation', status: 'completed', time: '2024-03-14 11:00:00' }
+        ]
+      },
+      { 
+        id: 'manifest', 
+        name: '舱单', 
+        icon: faFileAlt, 
+        status: 'completed',
+        tasks: [
+          { name: '舱单制作', type: 'operation', status: 'completed', time: '2024-03-15 09:00:00' }
+        ]
+      },
+      { 
+        id: 'vgm', 
+        name: 'VGM', 
+        icon: faWeight, 
+        status: 'completed',
+        tasks: [
+          { name: 'VGM提交', type: 'customer', status: 'completed', time: '2024-03-15 14:00:00' }
+        ]
+      },
+      { 
+        id: 'supplement', 
+        name: '补料', 
+        icon: faFileImport, 
+        status: 'partial',
+        tasks: [
+          { name: '补料提交', type: 'customer', status: 'completed', time: '2024-03-16 10:00:00' },
+          { name: '补料审核', type: 'operation', status: 'pending' },
+          { name: '补料费用', type: 'customer', status: 'skipped', time: '2024-03-16 11:00:00' }
+        ]
+      },
+      { 
+        id: 'bill', 
+        name: '账单', 
+        icon: faReceipt, 
+        status: 'pending',
+        tasks: [
+          { name: '账单生成', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'invoice', 
+        name: '发票', 
+        icon: faFileInvoiceDollar, 
+        status: 'pending',
+        tasks: [
+          { name: '发票开具', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'bill_of_lading', 
+        name: '提单', 
+        icon: faFileText, 
+        status: 'pending',
+        tasks: [
+          { name: '提单签发', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'switch_bill', 
+        name: '换单', 
+        icon: faExchangeAlt, 
+        status: 'pending',
+        tasks: [
+          { name: '换单处理', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'container_pickup', 
+        name: '提柜', 
+        icon: faBox, 
+        status: 'pending',
+        tasks: [
+          { name: '提柜安排', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'delivery', 
+        name: '送货', 
+        icon: faShippingFast, 
+        status: 'pending',
+        tasks: [
+          { name: '配送安排', type: 'operation', status: 'pending' }
+        ]
+      }
     ];
     
     // 运踪节点数据
     const trackingNodes = [
-      { id: 'empty_pickup', name: '提空箱', icon: faBox, completed: true, time: '2024-03-15 09:00:00' },
-      { id: 'expected_port_open', name: '预计开港', icon: faClock, completed: true, time: '2024-03-15 14:00:00' },
-      { id: 'port_cutoff', name: '港区截单', icon: faFileAlt, completed: true, time: '2024-03-16 10:00:00' },
-      { id: 'heavy_entry', name: '重箱进场', icon: faTruck, completed: true, time: '2024-03-16 15:00:00' },
-      { id: 'customs_release', name: '海关放行', icon: faCheckCircle, completed: true, time: '2024-03-17 11:00:00' },
-      { id: 'terminal_release', name: '码头放行', icon: faWarehouse, completed: true, time: '2024-03-17 16:00:00' },
-      { id: 'actual_berth', name: '实际靠泊', icon: faAnchor, completed: true, time: '2024-03-18 08:00:00' },
-      { id: 'loading_plan', name: '配载', icon: faCubes, completed: true, time: '2024-03-18 14:00:00' },
-      { id: 'actual_departure', name: '实际开船', icon: faPlay, completed: false, time: '-' },
-      { id: 'unloading', name: '卸船', icon: faStop, completed: false, time: '-' },
-      { id: 'heavy_pickup', name: '提重', icon: faShoppingCart, completed: false, time: '-' },
-      { id: 'return_empty', name: '还箱', icon: faUndo, completed: false, time: '-' }
+      { 
+        id: 'empty_pickup', 
+        name: '提空箱', 
+        icon: faBox, 
+        status: 'completed',
+        tasks: [
+          { name: '空箱提取', type: 'operation', status: 'completed', time: '2024-03-15 09:00:00' }
+        ]
+      },
+      { 
+        id: 'expected_port_open', 
+        name: '预计开港', 
+        icon: faClock, 
+        status: 'completed',
+        tasks: [
+          { name: '开港通知', type: 'operation', status: 'completed', time: '2024-03-15 14:00:00' }
+        ]
+      },
+      { 
+        id: 'port_cutoff', 
+        name: '港区截单', 
+        icon: faFileAlt, 
+        status: 'completed',
+        tasks: [
+          { name: '截单确认', type: 'operation', status: 'completed', time: '2024-03-16 10:00:00' }
+        ]
+      },
+      { 
+        id: 'heavy_entry', 
+        name: '重箱进场', 
+        icon: faTruck, 
+        status: 'partial',
+        tasks: [
+          { name: '进场申请', type: 'customer', status: 'completed', time: '2024-03-16 15:00:00' },
+          { name: '进场确认', type: 'operation', status: 'pending' },
+          { name: '加急费用', type: 'customer', status: 'skipped', time: '2024-03-16 16:00:00' }
+        ]
+      },
+      { 
+        id: 'customs_release', 
+        name: '海关放行', 
+        icon: faCheckCircle, 
+        status: 'completed',
+        tasks: [
+          { name: '海关审核', type: 'operation', status: 'completed', time: '2024-03-17 11:00:00' }
+        ]
+      },
+      { 
+        id: 'terminal_release', 
+        name: '码头放行', 
+        icon: faWarehouse, 
+        status: 'completed',
+        tasks: [
+          { name: '码头确认', type: 'operation', status: 'completed', time: '2024-03-17 16:00:00' }
+        ]
+      },
+      { 
+        id: 'actual_berth', 
+        name: '实际靠泊', 
+        icon: faAnchor, 
+        status: 'completed',
+        tasks: [
+          { name: '靠泊确认', type: 'operation', status: 'completed', time: '2024-03-18 08:00:00' }
+        ]
+      },
+      { 
+        id: 'loading_plan', 
+        name: '配载', 
+        icon: faCubes, 
+        status: 'completed',
+        tasks: [
+          { name: '配载计划', type: 'operation', status: 'completed', time: '2024-03-18 14:00:00' }
+        ]
+      },
+      { 
+        id: 'actual_departure', 
+        name: '实际开船', 
+        icon: faPlay, 
+        status: 'pending',
+        tasks: [
+          { name: '开船确认', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'unloading', 
+        name: '卸船', 
+        icon: faStop, 
+        status: 'pending',
+        tasks: [
+          { name: '卸船作业', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'heavy_pickup', 
+        name: '提重', 
+        icon: faShoppingCart, 
+        status: 'pending',
+        tasks: [
+          { name: '重箱提取', type: 'operation', status: 'pending' }
+        ]
+      },
+      { 
+        id: 'return_empty', 
+        name: '还箱', 
+        icon: faUndo, 
+        status: 'pending',
+        tasks: [
+          { name: '空箱归还', type: 'operation', status: 'pending' }
+        ]
+      }
     ];
 
     // 根据当前模式选择节点数据
     const nodes = isTrackingMode ? trackingNodes : businessNodes;
 
     // 计算最后一个已完成节点的索引
-    const completedNodesCount = nodes.filter((n: any) => n.completed).length;
+    const completedNodesCount = nodes.filter((n: any) => n.status === 'completed').length;
     // let lastCompletedIndex = -1;
     // for (let i = nodes.length - 1; i >= 0; i--) {
     //   if (nodes[i].completed) {
@@ -1373,7 +1599,10 @@ const OrderManagement: React.FC = () => {
                   <div className="font-bold text-gray-800 mb-1 whitespace-nowrap">
                     <FontAwesomeIcon 
                       icon={node.icon} 
-                      className={`mr-2 ${node.completed ? 'text-blue-500' : 'text-gray-400'}`} 
+                      className={`mr-2 ${
+                        node.status === 'completed' ? 'text-blue-500' : 
+                        node.status === 'partial' ? 'text-yellow-500' : 'text-gray-400'
+                      }`} 
                     />
                     {node.name}
                   </div>
@@ -1381,16 +1610,50 @@ const OrderManagement: React.FC = () => {
                 {/* 移除了原来的小圆形节点 */}
                 <div className="node-spacer h-[12px] mb-2 relative z-10"></div>
                 <div className={`node-line h-[30px] w-[2px] ${
-                  node.completed ? 'bg-blue-500' : 'bg-gray-300'
+                  node.status === 'completed' ? 'bg-blue-500' : 
+                  node.status === 'partial' ? 'bg-yellow-500' : 'bg-gray-300'
                 }`}></div>
                 <div className="node-status text-center">
-                  <Tag 
-                    color={node.completed ? 'blue' : 'gray'} 
-                    className="mb-2 mx-auto block w-24"
+                  <Tooltip
+                    content={
+                      <div>
+                        {node.tasks.map((task: any, index: number) => (
+                          <div key={index} style={{ marginBottom: '4px', color: 'white' }}>
+                            <span>
+                              {task.type === 'customer' ? '客户任务' : '运营任务'}：{task.name} - 
+                            </span>
+                            <span style={{
+                              color: task.status === 'completed' ? '#52c41a' : 
+                                     task.status === 'skipped' ? '#faad14' : '#ff4d4f',
+                              fontWeight: 'bold'
+                            }}>
+                              {task.status === 'completed' ? '已完成' : 
+                               task.status === 'skipped' ? '已跳过' : '未完成'}
+                            </span>
+                            {(task.status === 'completed' || task.status === 'skipped') && task.time && (
+                              <div style={{ fontSize: '12px', color: '#d9d9d9', marginTop: '2px' }}>
+                                {task.time}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    }
+                    position="top"
                   >
-                    {node.completed ? '已完成' : '未完成'}
-                  </Tag>
-                  <div className="text-gray-400 text-xs">{node.time}</div>
+                    <div style={{ cursor: 'pointer' }}>
+                      <Tag 
+                        color={
+                          node.status === 'completed' ? 'blue' : 
+                          node.status === 'partial' ? 'orange' : 'gray'
+                        } 
+                        className="mb-2 mx-auto block w-24"
+                      >
+                        {node.status === 'completed' ? '已完成' : 
+                         node.status === 'partial' ? '部分完成' : '未完成'}
+                      </Tag>
+                    </div>
+                  </Tooltip>
                 </div>
               </div>
             ))}
@@ -1553,7 +1816,7 @@ const OrderManagement: React.FC = () => {
           border={false}
           className="mt-4"
           expandedRowRender={(record) => (
-            <div className="p-4 bg-gray-50 relative">
+            <div className="w-full p-4 bg-gray-50">
               <TrackingNodes orderNo={record.orderNo} />
             </div>
           )}
@@ -1563,15 +1826,16 @@ const OrderManagement: React.FC = () => {
               <Button
                 type="text"
                 size="small"
-                icon={allExpanded ? <IconUp /> : <IconDown />}
+                icon={allExpanded ? <IconLeft /> : <IconRight />}
                 onClick={handleToggleAllExpanded}
                 className="p-0 h-auto text-gray-600 hover:text-blue-600"
               >
                 {allExpanded ? '收起' : '展开'}
               </Button>
             ),
-            width: 80,
+            width: 80
           }}
+
           expandedRowKeys={expandedRowKeys}
           onExpandedRowsChange={handleExpandedRowsChange}
         />

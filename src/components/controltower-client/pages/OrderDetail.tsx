@@ -11,7 +11,7 @@ import {
   Tabs,
   Input
 } from '@arco-design/web-react';
-import {   IconLeft,  IconEdit,  IconCopy,  IconClose,  IconUp,  IconSend,  IconRight,  IconDown} from '@arco-design/web-react/icon';
+import {   IconLeft,  IconEdit,  IconCopy,  IconClose,  IconSend,  IconRight,  IconDown} from '@arco-design/web-react/icon';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFileAlt, 
@@ -292,7 +292,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
               </div>
               
               {/* 节点卡片 */}
-              <div className={`ml-12 ${node.active ? '' : 'opacity-60'}`}>
+              <div className="ml-12">
                 <div 
                   className={`border rounded-lg ${isExpanded ? 'border-blue-200 bg-blue-50 shadow-sm' : 'border-gray-200'} overflow-hidden transition-all duration-200 ease-in-out hover:shadow-sm`}
                   onClick={() => {
@@ -373,10 +373,8 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
         </div>
         <div>
           <Space>
-            <Button type="secondary" icon={<IconEdit />}>编辑</Button>
             <Button type="primary" icon={<IconCopy />}>复制</Button>
-            <Button type="secondary" icon={<IconClose />}>取消</Button>
-            <Button type="secondary" icon={<IconUp />}>置顶</Button>
+            <Button type="secondary" icon={<IconClose />}>关闭</Button>
             <Button 
               type="secondary"
               icon={<FontAwesomeIcon icon={faGlobe} />} 
@@ -502,112 +500,63 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                 <CollapseItem
                   header={
                     <div className="flex items-center">
-                      <Title heading={6} style={{ margin: 0 }}>未完成任务（3）</Title>
+                      <Title heading={6} style={{ margin: 0 }}>未完成任务（12）</Title>
                     </div>
                   }
                   name="1"
                 >
-                  {/* 任务1：上传SI */}
-                  <div className="border-b pb-4 mb-4 border-gray-200">
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 10, 2021 17:00</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传SI</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海KKK国际物流有限公司</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 12, 2021 17:00</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* 任务2：上传VGM */}
-                  <div className="border-b pb-4 mb-4 border-gray-200">
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 12, 2021 14:00</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传VGM</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海得普赛国际物流有限公司</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 11, 2021 09:30</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
+                  {/* 客户端版未完成任务 */}
+                  {[
+                    { name: '提交询价', deadline: 'Nov 10, 2021 17:00', executor: '华为技术有限公司', generated: 'Nov 09, 2021 10:00' },
+                    { name: '提交订舱', deadline: 'Nov 12, 2021 14:00', executor: '阿里巴巴集团', generated: 'Nov 11, 2021 09:30' },
+                    { name: '提交拖车订单', deadline: 'Nov 15, 2021 16:30', executor: '腾讯科技有限公司', generated: 'Nov 13, 2021 10:15' },
+                    { name: '提交进仓申请', deadline: 'Nov 18, 2021 12:00', executor: '比亚迪股份有限公司', generated: 'Nov 16, 2021 14:20' },
+                    { name: '提交报关资料', deadline: 'Nov 20, 2021 15:30', executor: '海康威视数字技术股份有限公司', generated: 'Nov 18, 2021 11:45' },
+                    { name: '提交舱单', deadline: 'Nov 22, 2021 10:00', executor: '小米集团', generated: 'Nov 20, 2021 16:30' },
+                    { name: '提交VGM', deadline: 'Nov 25, 2021 13:45', executor: '京东集团', generated: 'Nov 23, 2021 09:15' },
+                    { name: '提交补料', deadline: 'Nov 28, 2021 11:20', executor: '宁德时代新能源科技股份有限公司', generated: 'Nov 26, 2021 14:50' },
+                    { name: '确认账单', deadline: 'Dec 01, 2021 16:00', executor: '中国平安保险集团股份有限公司', generated: 'Nov 29, 2021 10:30' },
+                    { name: '确认发票', deadline: 'Dec 03, 2021 14:15', executor: '招商银行股份有限公司', generated: 'Dec 01, 2021 12:45' },
+                    { name: '确认提单', deadline: 'Dec 05, 2021 17:30', executor: '中国建设银行股份有限公司', generated: 'Dec 03, 2021 15:20' },
+                    { name: '确认收货', deadline: 'Dec 08, 2021 10:45', executor: '中国工商银行股份有限公司', generated: 'Dec 06, 2021 13:10' }
+                  ].map((task, index) => (
+                    <div key={index} className={index < 11 ? "border-b pb-4 mb-4 border-gray-200" : ""}>
+                      <div className="grid grid-cols-4 gap-4 mt-3 relative">
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">截止时间</div>
+                          <div className="font-medium">{task.deadline}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">任务名称</div>
+                          <div className="font-medium">{task.name}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">执行人</div>
+                          <div className="font-medium">{task.executor}</div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-gray-500 mb-1">任务状态</div>
+                          <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 {task.generated}</span></div>
+                        </div>
+                        
+                        {/* 操作按钮放在最右侧 */}
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2 flex gap-2">
+                          <Button 
+                            type="primary" 
+                            icon={<IconSend />}
+                            onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
+                          >处理</Button>
+                          <Button 
+                            type="outline" 
+                            onClick={() => console.log('跳过任务:', task.name)}
+                          >跳过</Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* 任务3：上传提单补料 */}
-                  <div>
-                    <div className="grid grid-cols-4 gap-4 mt-3 relative">
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">截止时间</div>
-                        <div className="font-medium">Nov 15, 2021 16:30</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">任务名称</div>
-                        <div className="font-medium">上传提单补料</div>
-                      </div>
-                      
-                      <div className="border-r border-gray-200 pr-4">
-                        <div className="text-gray-500 mb-1">执行人</div>
-                        <div className="font-medium">上海XXX货运代理</div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-gray-500 mb-1">任务状态</div>
-                        <div className="font-medium">待处理 <span className="text-xs text-gray-500 ml-1">生成于 Nov 13, 2021 10:15</span></div>
-                      </div>
-                      
-                      {/* 处理按钮放在最右侧 */}
-                      <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                        <Button 
-                          type="primary" 
-                          icon={<IconSend />}
-                          onClick={() => navigate(`/controltower/bl-addition/${orderId || 'DEFAULT'}`)}
-                        >处理</Button>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </CollapseItem>
               </Collapse>
             </Card>
@@ -621,32 +570,58 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                 <CollapseItem
                   header={
                     <div className="flex items-center">
-                      <Title heading={6} style={{ margin: 0 }}>已完成任务（3）</Title>
+                      <Title heading={6} style={{ margin: 0 }}>已完成任务（12）</Title>
                     </div>
                   }
                   name="1"
                 >
-                  <div className="grid grid-cols-4 gap-4 mt-3">
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">完成时间</div>
-                      <div className="font-medium">Nov 08, 2021 14:30</div>
+                  {/* 客户端版已完成任务 */}
+                  {[
+                    { name: '提交询价', completedTime: 'Oct 15, 2021 09:30', executor: '华为技术有限公司', deadline: 'Oct 15, 2021 17:00' },
+                    { name: '提交订舱', completedTime: 'Oct 18, 2021 11:45', executor: '阿里巴巴集团', deadline: 'Oct 18, 2021 14:00' },
+                    { name: '提交拖车订单', completedTime: 'Oct 20, 2021 14:20', executor: '腾讯科技有限公司', deadline: 'Oct 20, 2021 16:30' },
+                    { name: '提交进仓申请', completedTime: 'Oct 22, 2021 10:15', executor: '比亚迪股份有限公司', deadline: 'Oct 22, 2021 12:00' },
+                    { name: '提交报关资料', completedTime: 'Oct 25, 2021 13:30', executor: '海康威视数字技术股份有限公司', deadline: 'Oct 25, 2021 15:30' },
+                    { name: '提交舱单', completedTime: 'Oct 28, 2021 08:45', executor: '小米集团', deadline: 'Oct 28, 2021 10:00' },
+                    { name: '提交VGM', completedTime: 'Oct 30, 2021 12:20', executor: '京东集团', deadline: 'Oct 30, 2021 13:45' },
+                    { name: '提交补料', completedTime: 'Nov 02, 2021 09:50', executor: '宁德时代新能源科技股份有限公司', deadline: 'Nov 02, 2021 11:20' },
+                    { name: '确认账单', completedTime: 'Nov 05, 2021 15:10', executor: '中国平安保险集团股份有限公司', deadline: 'Nov 05, 2021 16:00' },
+                    { name: '确认发票', completedTime: 'Nov 08, 2021 12:35', executor: '招商银行股份有限公司', deadline: 'Nov 08, 2021 14:15' },
+                    { name: '确认提单', completedTime: 'Nov 10, 2021 16:45', executor: '中国建设银行股份有限公司', deadline: 'Nov 10, 2021 17:30' },
+                    { name: '确认收货', completedTime: 'Nov 12, 2021 09:20', executor: '中国工商银行股份有限公司', deadline: 'Nov 12, 2021 10:45' }
+                  ].map((task, index) => (
+                    <div key={index} className={index < 11 ? "border-b pb-4 mb-4 border-gray-200" : ""}>
+                      <div className="grid grid-cols-4 gap-4 mt-3 relative">
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">完成时间</div>
+                          <div className="font-medium">{task.completedTime}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">任务名称</div>
+                          <div className="font-medium">{task.name}</div>
+                        </div>
+                        
+                        <div className="border-r border-gray-200 pr-4">
+                          <div className="text-gray-500 mb-1">执行人</div>
+                          <div className="font-medium">{task.executor}</div>
+                        </div>
+                        
+                        <div>
+                          <div className="text-gray-500 mb-1">任务状态</div>
+                          <div className="font-medium text-green-600">已完成 <span className="text-xs text-gray-500 ml-1">完成于 {task.completedTime}</span></div>
+                        </div>
+                        
+                        {/* 查看按钮放在最右侧 */}
+                        <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+                          <Button 
+                            type="outline" 
+                            onClick={() => console.log('查看任务:', task.name)}
+                          >查看</Button>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">任务名称</div>
-                      <div className="font-medium">确认订舱</div>
-                    </div>
-                    
-                    <div className="border-r border-gray-200 pr-4">
-                      <div className="text-gray-500 mb-1">执行人</div>
-                      <div className="font-medium">上海得普赛国际物流有限公司</div>
-                    </div>
-                    
-                    <div>
-                      <div className="text-gray-500 mb-1">任务状态</div>
-                      <div className="font-medium text-green-600">已完成 <span className="text-xs text-gray-500 ml-1">完成于 Nov 08, 2021 14:30</span></div>
-                    </div>
-                  </div>
+                  ))}
                 </CollapseItem>
               </Collapse>
             </Card>
@@ -654,7 +629,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
 
           {/* 选项卡区域 */}
           <Card bordered={false} className="mb-4 shadow-sm">
-            <Tabs defaultActiveTab="留言板">
+            <Tabs defaultActiveTab="概览">
               <TabPane key="留言板" title="留言板">
                 {/* 协作方联系信息 - 可展开缩起 - 移到文本输入框上方 */}
                 <Collapse defaultActiveKey={[]} bordered={false} className="mb-4">
@@ -1155,99 +1130,69 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
               <TabPane key="文件" title="文件">
                 <div className="flex justify-between mb-4">
                   <div className="flex space-x-4">
+                    {/* 文件名搜索 */}
+                    <Input 
+                      className="w-48"
+                      placeholder="搜索文件名..."
+                      allowClear
+                    />
                     <div className="relative">
-                      {/* 文件状态下拉菜单 */}
+                      {/* 节点筛选下拉菜单 */}
                       <Button 
                         className="w-32 flex justify-between items-center"
                         onClick={() => {
-                          const dropdown = document.getElementById('fileStatusDropdown');
+                          const dropdown = document.getElementById('nodeFilterDropdown');
                           if (dropdown) {
                             dropdown.classList.toggle('hidden');
-                            // 关闭其他下拉菜单
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
                           }
                         }}
                       >
-                        文件状态 <IconDown className="text-xs" />
+                        节点筛选 <IconDown className="text-xs" />
                       </Button>
                       <div 
-                        id="fileStatusDropdown"
+                        id="nodeFilterDropdown"
                         className="absolute left-0 top-full mt-1 w-32 bg-white shadow-lg rounded z-50 hidden"
                       >
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >有效</div>
+                        >全部</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >过期</div>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      {/* 文件类型下拉菜单 */}
-                      <Button 
-                        className="w-32 flex justify-between items-center"
-                        onClick={() => {
-                          const dropdown = document.getElementById('fileTypeDropdown');
-                          if (dropdown) {
-                            dropdown.classList.toggle('hidden');
-                            // 关闭其他下拉菜单
-                            document.getElementById('fileStatusDropdown')?.classList.add('hidden');
-                          }
-                        }}
-                      >
-                        文件类型 <IconDown className="text-xs" />
-                      </Button>
-                      <div 
-                        id="fileTypeDropdown"
-                        className="absolute left-0 top-full mt-1 w-56 bg-white shadow-lg rounded z-50 hidden"
-                      >
+                        >订舱</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >托书</div>
+                        >报关</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >订舱确认</div>
+                        >拖车</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >提单格式件</div>
+                        >仓库</div>
                         <div 
                           className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
                           onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
+                            document.getElementById('nodeFilterDropdown')?.classList.add('hidden');
                           }}
-                        >账单</div>
-                        <div 
-                          className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
-                          }}
-                        >发票</div>
-                        <div 
-                          className="py-2 px-3 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            document.getElementById('fileTypeDropdown')?.classList.add('hidden');
-                          }}
-                        >进仓通知</div>
+                        >提单补料</div>
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between" style={{ width: '250px' }}> {/* 使用固定宽度和justify-between彻底分开按钮 */}
-                    <Button type="outline" icon={<IconEdit />}>上传文件</Button>
+                  <div className="flex justify-end">
                     <Button type="outline" icon={<IconDown />}>下载全部</Button>
                   </div>
                 </div>
@@ -1276,7 +1221,7 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                             <input type="checkbox" className="form-checkbox" />
                           </td>
                           <td className="py-4">
-                            <div className="text-blue-600">{isEven ? 'Booking Form (PDF)' : 'Shipping Instructions'}</div>
+                            <div className="text-blue-600">{isEven ? '订舱-上传BC件' : '报关-上传报关资料'}</div>
                             <div className="text-gray-500 text-sm">
                               {isEven ? 'ACL-Booking-FLEX-1198464.pdf' : '1198464-Shipping-Instructions-20211015T022845.pdf'}
                             </div>
@@ -1330,8 +1275,6 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
                   </tbody>
                 </table>
               </TabPane>
-              <TabPane key="费用" title="费用" />
-              <TabPane key="报价" title="报价" />
             </Tabs>
           </Card>
 
@@ -1357,4 +1300,4 @@ const OrderDetail: React.FC<OrderDetailProps> = () => {
   );
 };
 
-export default OrderDetail; 
+export default OrderDetail;

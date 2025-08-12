@@ -307,6 +307,13 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
       category: '系统设置',
       icon: <IconSettings />
     },
+    { 
+      title: '业务节点设置', 
+      key: 'business-node-settings', 
+      path: '/controltower/business-node-settings',
+      category: '系统设置',
+      icon: <IconSettings />
+    },
     
     // 基础资料维护
     { 
@@ -869,6 +876,12 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
           { title: '任务管理', path: '/controltower/task-management' }
         );
         break;
+      case 'business-node-settings':
+        breadcrumbs.push(
+          { title: '系统设置', path: undefined },
+          { title: '业务节点设置', path: undefined }
+        );
+        break;
       case 'template-settings':
         breadcrumbs.push(
           { title: '系统设置', path: undefined },
@@ -1335,6 +1348,7 @@ const ControlTowerLayout: React.FC<LayoutProps> = ({ children }) => {
                 <MenuItem key="personalization-config">个性化配置</MenuItem>
                 <MenuItem key="template-settings">模板设置</MenuItem>
                 <MenuItem key="task-management">任务管理</MenuItem>
+                <MenuItem key="business-node-settings">业务节点设置</MenuItem>
               </SubMenu>
 
               {/* 基础资料维护 */}
